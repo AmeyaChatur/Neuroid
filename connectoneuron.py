@@ -28,13 +28,53 @@ query="""SELECT model_master.model_master_id,simulation_req_res.model_master_id,
         FROM simulation_req_res
         INNER JOIN model_master ON model_master.model_master_id=simulation_req_res.model_master_id 
         WHERE status='new'"""         
-cur.execute(query)
-print_row(cur)
 
 def runDocker():
-    # os.system('cmd /c "C:\Program Files\Docker\Docker\Docker Desktop.exe"')
+
+    # os.system('cmd /c "C:\Program Files\Docker\Docker\DockerCli.exe -SwitchtoLinuxEngine"')
     # os.system('cmd /c "docker run --rm python-hello-world"')
-    res=docker.run("python-hello-world", remove=True)
-    print(res)
+
+    """
+    To check if the image is present in the local machine and pull the image if not present
+    """
+    try:
+        docker.image.inspect("raghusesha/neuroidv2.x:litedemo_l4l5")
+    except:
+        docker.pull("raghusesha/neuroidv2.x:litedemo_l4l5")
+
+    # res=docker.run("raghusesha/neuroidv2.x:litedemo_l4l5",publish=[("5910:5900","5911:5901")],tty=True)
+    # print(res)
+
+    # Running the conatiner
+    if docker.container.inspect("neuroid2.xcont1"):
+        print("Container already exists...\nStarting Container...")
+        os.system('cmd /c "docker start -i neuroid2.xcont1"')
+    else:
+        print("Container does not exist...\nRunning Container...")
+        os.system('cmd /c "docker run -it -p 5910:5900 -p 5911:5901"' 
+                    '" --name neuroid2.xcont1 raghusesha/neuroidv2.x:litedemo_l4l5 /bin/bash"')
+    # Do tasks on Docker
+
+    #Stop the container
+    # print("Stopping Container...")
+    # docker.stop("neuroid2.xcont1")
+
+#Checking if new entries are added to the table
+# i=0
+# while True:
+#     cur=conn.cursor()
+#     #Initial Query to get the existing number of rows
+#     cur.execute(query)
+#     print(cur)
+#     #Rolls back to start
+#     conn.rollback()
+#     time.sleep(refresh_mins*60)
+#     if cur.rowcount > 0:
+#         print("New entry detected")
+#         print_row(cur)
+#         runDocker()
+#     print("Checking for new entries...",i,"times")
+#     i+=1
+# conn.close()
 
 runDocker()
